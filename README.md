@@ -1,0 +1,1 @@
+libbgmi.so
