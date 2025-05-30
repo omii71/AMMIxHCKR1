@@ -1,0 +1,1452 @@
+#include "Helper/include.h"
+#include "Helper/definition.h"
+#include "FONT.h"
+#include "Items.h"
+//#include "bypass.h"
+json items_data;
+std::map<int, bool> Items;
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <curl/curl.h>
+#include <dirent.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <android/native_activity.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <openssl/sha.h>
+#include <fstream>
+#include <iomanip>
+#include <dlfcn.h>
+#include <cstddef>
+#include <unwind.h>
+#include <dlfcn.h>
+#include <libgen.h>
+#include <stdint.h>
+#include <cstring>
+#include <functional>
+#include <unwind.h>
+#include <dlfcn.h>
+#include <libgen.h>
+#include <stdint.h>
+#include <cstring>
+#include <functional>
+#include "imgui/stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "IMAGE/Bot_off.h"
+#include "IMAGE/Bot_on.h"
+#include "IMAGE/Enemy_off.h"
+#include "IMAGE/Enemy_on.h"
+
+//float FOVSizea = 100;
+float VIJAYPOWER = 340.0f;
+bool Bypass = true;
+bool Ipad = false;
+bool PRIMEMENU = true;
+bool Island = false;
+bool CANTROL = true;
+bool KEYEXPIRE =  true;
+bool KEYSLOT =  true;
+bool AimBottt;
+bool Bullet;
+
+ ///////CAPTAIN  //////
+#define targetLibName OBFUSCATE("libUE4.so")
+#define targetLibName OBFUSCATE("libanogs.so")
+#define targetLibName OBFUSCATE("libanort.so")
+#define targetLibName OBFUSCATE("libhdmpve.so")
+#define targetLibName ("libTBlueData.so")
+#define targetLibName ("libRoosterNN.so")
+#define targetLibName ("libhdmpve.so")
+#define targetLibName ("libCrashKit.so")
+#define targetLibName ("libITOP.so")
+#define targetLibName ("libAntsVoice.so")
+
+//////////////////////
+
+ImColor outlinecolor = IM_COL32(0, 0, 0, 255);
+
+#include <fcntl.h>
+const char* LIB_PATH = "/data/data/your.package.name/lib/libUE4.so";
+int fd = open(LIB_PATH, O_RDWR);
+
+#define LOG_TAG "CrashFix"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LIB_PATH "/data/app/your.package.name-*/lib/arm64/libUE4.so"  // adjust as per actual
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_your_package_name_CrashFix_applyFix(JNIEnv *env, jclass clazz) {
+    const uintptr_t target_offset = 0x78DE34;  // libUE4.so offset
+    const uint32_t NOP_INSTRUCTION = 0x1F2003D5;
+
+    int fd = open(LIB_PATH, O_RDWR);
+    if (fd < 0) {
+        LOGI("Failed to open libUE4.so");
+        return;
+    }
+
+    off_t page_size = sysconf(_SC_PAGESIZE);
+    off_t page_start = (target_offset / page_size) * page_size;
+    off_t page_offset = target_offset - page_start;
+
+    void *mapped = mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, page_start);
+    if (mapped == MAP_FAILED) {
+        LOGI("mmap failed");
+        close(fd);
+        return;
+    }
+
+    uint32_t *target = (uint32_t *)((char *)mapped + page_offset);
+    *target = NOP_INSTRUCTION;
+    __builtin___clear_cache((char *)target, (char *)target + sizeof(uint32_t));
+    LOGI("CrashFix applied at offset 0x%lX", target_offset);
+
+    munmap(mapped, page_size);
+    close(fd);
+}
+
+
+//#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "@GLACIER_MODZ", __VA_ARGS__)
+
+FVector TargetPos = {};
+void clampAngles(FRotator &angles)//AIM 1 SAFE 
+{
+    if (angles.Pitch > 180)
+        angles.Pitch -= 360;
+    if (angles.Pitch < -180)
+        angles.Pitch += 360;
+    if (angles.Pitch < -75.f)
+        angles.Pitch = -75.f;
+    else if (angles.Pitch > 75.f)
+        angles.Pitch = 75.f;
+    while (angles.Yaw < -180.0f)
+        angles.Yaw += 360.0f;
+    while (angles.Yaw > 180.0f)
+        angles.Yaw -= 360.0f;
+}
+ ///////CAPTAIN  //////
+
+
+const char *Gamepackage = "com.pubg.imobile";
+
+static char path[200];
+static int currentItem = 0;
+
+FVector operator*(const FVector &vector, float scalar)
+{
+    return FVector({vector.X * scalar, vector.Y * scalar, vector.Z * scalar});
+}
+
+int32_t (*orig_ANativeWindow_getWidth)(ANativeWindow *window);
+int32_t _ANativeWindow_getWidth(ANativeWindow *window)
+{
+    screenWidth = orig_ANativeWindow_getWidth(window);
+    return orig_ANativeWindow_getWidth(window);
+}
+
+void (*orig_onInputEvent)(void *thiz, void *ex_ab, void *ex_ac);
+void onInputEvent(void *thiz, void *ex_ab, void *ex_ac)
+{
+    orig_onInputEvent(thiz, ex_ab, ex_ac);
+    if (initImGui)
+    {
+        ImGui_ImplAndroid_HandleInputEvent((AInputEvent *)thiz, {(float)screenWidth / (float)glWidth, (float)screenHeight / (float)glHeight});
+    }
+    return;
+}
+
+int32_t (*orig_ANativeWindow_getHeight)(ANativeWindow *window);
+int32_t _ANativeWindow_getHeight(ANativeWindow *window)
+{
+    screenHeight = orig_ANativeWindow_getHeight(window);
+    return orig_ANativeWindow_getHeight(window);
+}
+
+void DrawFilledRectangle(ImDrawList *drawList, float X, float Y, float W, float H, ImU32 Color)
+{
+    drawList->AddRectFilled(ImVec2(X, Y), ImVec2(X - W, Y - H), Color);
+}
+struct TextureInfo { ImTextureID textureId; int x; int y; int w; int h; };
+void DrawImage(int x, int y, int w, int h, ImTextureID Texture) {
+ImGui::GetForegroundDrawList()->AddImage(Texture, ImVec2(x, y), ImVec2(x + w, y + h));}
+static TextureInfo textureInfo;
+TextureInfo createTexture(char *ImagePath) {
+int w, h, n;
+stbi_uc *data = stbi_load(ImagePath, &w, &h, &n, 0);
+GLuint texture;
+glGenTextures(1, &texture);
+glEnable(GL_TEXTURE_2D);
+glBindTexture(GL_TEXTURE_2D, texture);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+if (n == 3) {
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+} else {
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+}stbi_image_free(data);
+textureInfo.textureId = reinterpret_cast<ImTextureID>((GLuint *) texture);
+textureInfo.w = w;
+textureInfo.h = h;
+return textureInfo;}
+TextureInfo CreateTexture(const unsigned char* buf, int len) {
+TextureInfo image;
+unsigned char* image_data = stbi_load_from_memory(buf, len, &image.w, &image.h, NULL, 0);
+if (image_data == NULL) {perror("File does not exist");}
+GLuint image_texture;
+glGenTextures(1, &image_texture);
+glBindTexture(GL_TEXTURE_2D, image_texture);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.w, image.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+stbi_image_free(image_data);
+image.textureId = (ImTextureID)image_texture;
+return image;}
+//TextureInfo LogoPic;
+//TextureInfo rahul;
+TextureInfo Bot_off;
+TextureInfo Bot_on;
+TextureInfo Enemy_off;
+TextureInfo Enemy_on;
+void InitTexture() {
+//rahul = CreateTexture(rahul_data, sizeof(rahul_data));
+//LogoPic = CreateTexture(LogoPic_data, sizeof(LogoPic_data));
+Bot_off = CreateTexture(Bot_off_data, sizeof(Bot_off_data));
+Bot_on = CreateTexture(Bot_on_data, sizeof(Bot_on_data));
+Enemy_off = CreateTexture(Enemy_off_data, sizeof(Enemy_off_data));
+Enemy_on = CreateTexture(Enemy_on_data, sizeof(Enemy_on_data));
+}
+ImU32 Black = IM_COL32(0, 0, 0, 255);
+ImU32 Green = IM_COL32(0, 255, 0, 255);
+ImU32 Yellow = IM_COL32(255, 255, 0, 255);
+ImU32 Red = IM_COL32(255, 0, 0, 255);
+ImU32 Red2 = IM_COL32(255, 0, 0, 255);
+ImU32 Orange = IM_COL32(255, 165, 0, 255);
+
+bool fileExists(const std::string &filePath)
+{
+
+    std::ifstream file(filePath);
+
+    return file.good();
+}
+
+bool directoryExists(const std::string &path)
+{
+    DIR *dir = opendir(path.c_str());
+    if (dir)
+    {
+        closedir(dir);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+/*
+
+void DrawFilledRectangle(ImDrawList *drawList, float X, float Y, float W, float H, ImU32 Color)
+{
+    drawList->AddRectFilled(ImVec2(X, Y), ImVec2(X - W, Y - H), Color);
+}
+
+ImU32 Black = IM_COL32(0, 0, 0, 255);
+ImU32 Green = IM_COL32(0, 255, 0, 255);
+ImU32 Yellow = IM_COL32(255, 255, 0, 255);
+ImU32 Red = IM_COL32(255, 0, 0, 255);
+ImU32 Red2 = IM_COL32(255, 0, 0, 255);
+*/
+bool ShowFov;
+
+void GetLocalPlayer()
+{
+    if (auto GWorld = GetWorld())
+    {
+        if (auto NetDriver = GWorld->NetDriver)
+        {
+            if (auto PlayerController = NetDriver->ServerConnection->PlayerController)
+            {
+                ASTExtraPlayerController *localController = (ASTExtraPlayerController *)PlayerController;
+                ASTExtraPlayerCharacter *localPlayer = (ASTExtraPlayerCharacter *)localController->AcknowledgedPawn;
+
+                if (localController && localPlayer)
+                {
+                    Cheat::localController = localController;
+                    Cheat::localPlayer = localPlayer;
+                }
+            }
+        }
+    }
+}
+ ///////CAPTAIN  //////
+void (*Orig_Shoot_Event)(USTExtraShootWeaponComponent *thiz, FVector start, FRotator rot, void *unk1, int unk2, float a6, float a7, float a8) = 0;
+void Hook_Shoot_Event(USTExtraShootWeaponComponent *thiz, FVector start, FRotator rot, ASTExtraShootWeapon *weapon, int unk1, float a6, float a7, float a8)
+{
+    if (Cheat::Aimbot::EnableBT)
+    {
+        ASTExtraPlayerCharacter *Target = GetTargetForAimBot();
+        if (Target)
+        {
+            FVector targetAimPos = Target->GetBonePos("Head", {0, 0, 0});
+            targetAimPos.Z -= 10.0f;
+            FRotator sex = ToRotator(start, targetAimPos);
+
+            return Orig_Shoot_Event(thiz, targetAimPos, sex, weapon, unk1, a6, a7, a8);
+        }
+    }
+    return Orig_Shoot_Event(thiz, start, rot, weapon, unk1, a6, a7, a8);
+}
+ ///////CAPTAIN  //////
+
+
+void DrawESP(ImDrawList *draw)
+{
+MemoryPatch::createWithHex("libswappy.so",0x39970,"32 45 50 37").Modify();
+MemoryPatch::createWithHex("libswappy.so",0x39978,"32 45 50 37").Modify();
+MemoryPatch::createWithHex("libswappy.so", 0x3997C,"32 45 50 37").Modify();
+        
+
+std::string telegram = "CROWN BEAST MOD ";
+auto telegramTextSize = ImGui::CalcTextSize2(telegram.c_str(), 0, 30.0f); 
+float telegramPosX = (glWidth - telegramTextSize.x) / 1.0f;
+float telegramPosY = 630.0f; 
+DrawTextWithBorder(draw, telegram, {telegramPosX, telegramPosY}, IM_COL32(50, 205, 50, 255), IM_COL32(0, 0, 0, 255), 30.0f);
+
+
+
+
+
+if (AimBottt){
+std::string telegram = "Smart Aimbot";
+auto telegramTextSize = ImGui::CalcTextSize2(telegram.c_str(), 0, 40.0f); 
+float telegramPosX = (glWidth - telegramTextSize.x) / 2.0f;
+float telegramPosY = 40.0f; 
+DrawTextWithBorder(draw, telegram, {telegramPosX, telegramPosY}, IM_COL32(255, 0, 0, 255), IM_COL32(0, 0, 0, 255), 40.0f);
+
+
+}
+
+ ///////CAPTAIN  //////
+
+if (Bullet){
+std::string telegram = "Bullet track";
+auto telegramTextSize = ImGui::CalcTextSize2(telegram.c_str(), 0, 40.0f); 
+float telegramPosX = (glWidth - telegramTextSize.x) / 2.0f;
+float telegramPosY = 40.0f; 
+DrawTextWithBorder(draw, telegram, {telegramPosX, telegramPosY}, IM_COL32(255, 255, 0, 255), IM_COL32(0, 0, 0, 255), 40.0f);
+
+}
+
+ ///////CAPTAIN  //////
+
+ ///////CAPTAIN  //////
+
+	
+	
+ASTExtraPlayerCharacter *localPlayer = 0;
+ASTExtraPlayerController *localPlayerController = 0;
+
+auto Actors = GetActors();
+    for (int i = 0; i < Actors.size(); i++) {
+            auto Actor = Actors[i];
+            if (isObjectInvalid(Actor))
+                continue;
+
+            if (Actor->IsA(ASTExtraPlayerController::StaticClass())) {
+                localPlayerController = (ASTExtraPlayerController *) Actor;
+                break;
+            }
+        }
+    
+        if (localPlayerController) {
+            for (int i = 0; i < Actors.size(); i++) {
+                auto Actor = Actors[i];
+                if (isObjectInvalid(Actor))
+                    continue;
+
+                if (Actor->IsA(ASTExtraPlayerCharacter::StaticClass())) {
+                    if (((ASTExtraPlayerCharacter *) Actor)->PlayerKey ==
+                        localPlayerController->PlayerKey) {
+                        localPlayer = (ASTExtraPlayerCharacter *) Actor;
+                        break;
+                    }
+                }
+            }
+
+            
+            if (localPlayer) {
+                if (localPlayer->PartHitComponent) {
+                    auto ConfigCollisionDistSqAngles = localPlayer->PartHitComponent->ConfigCollisionDistSqAngles;
+                    for (int j = 0; j < ConfigCollisionDistSqAngles.Num(); j++) {
+                        ConfigCollisionDistSqAngles[j].Angle = 90.0f;
+                    }
+                    localPlayer->PartHitComponent->ConfigCollisionDistSqAngles = ConfigCollisionDistSqAngles;
+                }
+                }
+                }
+				
+				if(localPlayerController != 0) {
+				
+		
+	//draw->AddText({((float) density / 14.0f), 70}, IM_COL32(0, 255, 0, 255)," PLAY SAFE || AVOID REPORT ICLD [ ON ]");
+//draw->AddCircle(ImVec2(glWidth / 2, glHeight / 2), VIJAYPOWER, ImColor(255, 0, 0, 255), 0, 0.9f);
+MemoryPatch::createWithHex("libswappy.so",0x39970,"32 45 50 37").Modify();
+MemoryPatch::createWithHex("libswappy.so",0x39978,"32 45 50 37").Modify();
+MemoryPatch::createWithHex("libswappy.so", 0x3997C,"32 45 50 37").Modify();
+MemoryPatch::createWithHex("libhdmpve.so",0x70D30,"89 EA 04 04").Modify();
+Cheat::Aimbot::Enable = true;
+AimBottt = true;
+}else{ 
+Cheat::Aimbot::Enable = false;
+AimBottt = false;
+}
+    if (Cheat::localPlayer && Cheat::localController)
+    {
+		
+	 ///////CAPTAIN  //////
+        
+                           if (Cheat::Aimbot::Enable) {
+						//draw->AddCircle(ImVec2(glWidth / 2, glHeight / 2), FOVSizea, IM_COL32(255, 255, 0, 240), 0, 0.7f);;
+    ASTExtraPlayerCharacter* Target = GetTargetForAimBot();
+    if (Target) {
+        if (Cheat::localPlayer->bIsWeaponFiring || Cheat::localPlayer->bIsGunADS) {
+            FVector targetAimPos = Target->GetBonePos("Head", {});
+
+            if (auto WeaponManagerComponent = Cheat::localPlayer->WeaponManagerComponent) {
+                auto PropSlot = WeaponManagerComponent->GetCurrentUsingPropSlot();
+
+                if ((int)PropSlot.GetValue() >= 1 && (int)PropSlot.GetValue() <= 3) {
+                    if (auto CurrentWeaponReplicated = (ASTExtraShootWeapon*)WeaponManagerComponent->CurrentWeaponReplicated) {
+                        if (auto ShootWeaponComponent = CurrentWeaponReplicated->ShootWeaponComponent) {
+                            if (auto ShootWeaponEntityComponent = ShootWeaponComponent->ShootWeaponEntityComponent) {
+                                float BulletFireSpeed = CurrentWeaponReplicated->GetBulletFireSpeedFromEntity();
+
+                                if (auto CurrentVehicle = Target->CurrentVehicle) {
+                                    FVector LinearVelocity = CurrentVehicle->ReplicatedMovement.LinearVelocity;
+
+                                    float dist = Cheat::localPlayer->GetDistanceTo(Target);
+                                    auto timeToTravel = dist / BulletFireSpeed;
+                                    targetAimPos = UKismetMathLibrary::Add_VectorVector(targetAimPos, MultiplyVectorFloat(LinearVelocity, timeToTravel));
+                                } else {
+                                    FVector Velocity = Target->GetVelocity();
+                                    float dist = Cheat::localPlayer->GetDistanceTo(Target);
+                                    auto timeToTravel = dist / BulletFireSpeed;
+                                    targetAimPos = UKismetMathLibrary::Add_VectorVector(targetAimPos, MultiplyVectorFloat(Velocity, timeToTravel));
+                                }
+
+                                if (Cheat::Aimbot::Enable) {
+                                    if (Cheat::localPlayer->bIsGunADS) {
+                                        float dist = Cheat::localPlayer->GetDistanceTo(Target) / 100.f;
+                                        targetAimPos.Z -= dist * Cheat::Aimbot::RecoilSet;
+                                    }
+                                }
+
+                                FVector gunlocation = Cheat::localController->PlayerCameraManager->CameraCache.POV.Location;
+                                FRotator aimrotation = ToRotator(gunlocation, targetAimPos);
+                                FRotator gunrotaton = Cheat::localController->PlayerCameraManager->CameraCache.POV.Rotation;
+
+                                aimrotation.Pitch -= gunrotaton.Pitch;
+                                aimrotation.Yaw -= gunrotaton.Yaw;
+                                aimrotation.Roll = 0.0f;
+
+                                clampAngles(aimrotation);
+
+                                gunrotaton.Pitch += aimrotation.Pitch / 1.9f;
+                                gunrotaton.Yaw += aimrotation.Yaw / 1.9f;
+                                gunrotaton.Roll = 0.0f;
+
+                                Cheat::localController->SetControlRotation(gunrotaton, "");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+ }
+ 
+ //ipad
+    
+ if (Cheat::Aimbot::Enable) {
+if (Cheat::localController != nullptr) {
+static ULocalPlayer *UlocalPlayer = nullptr;
+if (!UlocalPlayer) {
+    UlocalPlayer = UObject::FindObject<ULocalPlayer>("LocalPlayer Transient.UAEGameEngine_1.LocalPlayer_1");
+}
+   
+if (UlocalPlayer == nullptr)
+return;
+
+static auto OrigView = UlocalPlayer->AspectRatioAxisConstraint;
+if (Cheat::localController != nullptr) {
+UlocalPlayer->AspectRatioAxisConstraint = EAspectRatioAxisConstraint::AspectRatio_MaintainYFOV;
+} else {
+if (UlocalPlayer->AspectRatioAxisConstraint != OrigView)
+{
+UlocalPlayer->AspectRatioAxisConstraint = OrigView;
+}
+}
+}
+}
+ ///////CAPTAIN  //////
+
+if (Cheat::localPlayer->CurrentVehicle) {
+    auto CurrentVehicle = localPlayer->CurrentVehicle;
+    auto RootComponent = static_cast<UPrimitiveComponent*>(CurrentVehicle->K2_GetRootComponent());
+    if (RootComponent) {
+        if (CurrentVehicle->GetVelocity().Size() > 80.f) {
+            FVector THUNDER;
+            THUNDER.X = 0.f;  
+            THUNDER.Y = 0.f;  
+            THUNDER.Z = 130.f; 
+
+            RootComponent->SetAllPhysicsLinearVelocity(THUNDER, true);
+        }
+    }
+}
+
+
+
+ 
+ if (Cheat::Esp::TargetLine) 
+        {                                        
+            if (Cheat::Aimbot::VisCheck) 
+            {
+                ASTExtraPlayerCharacter *Target = GetTargetForAimBot();
+                long AimLine = IM_COL32(55, 255, 0, 255);
+                if (Target) 
+                {
+                    FVector Takla = Target->GetBonePos("Head", {});
+                    ImVec2 headPosSC;
+                    if (W2S(Takla, (FVector2D *)&headPosSC)) 
+                    {
+                        draw->AddLine(headPosSC, {(float) glWidth / 2, (float) glHeight}, AimLine, 1.5f);
+                    }
+                }
+            }
+        }          
+
+				
+       		            if (Cheat::localPlayer && Cheat::localController)
+        {
+            
+            int totalEnemies = 0, totalBots = 0;
+
+            auto Actors = GetActors();
+
+            for (auto &Actor : Actors)
+            {
+                if (Actor->IsA(ASTExtraPlayerCharacter::StaticClass()))
+                {
+                    auto Player = (ASTExtraPlayerCharacter *)Actor;
+                    bool IsVisible = Cheat::localController->LineOfSightTo(Cheat::localController->PlayerCameraManager, Player->GetBonePos("Head", {}), true);
+
+                    ImColor Color;
+
+                    bool IsBotVisible = Player->bEnsure && IsVisible;
+                    bool IsPlayerVisible = !Player->bEnsure && IsVisible;
+                    bool IsBotNotVisible = Player->bEnsure && !IsVisible;
+                    bool IsPlayerNotVisible = !Player->bEnsure && !IsVisible;
+
+                    if (IsBotVisible)
+                    {
+                        Color = IM_COL32(0, 255, 0, 255);
+                    }
+                    if (IsPlayerVisible)
+                    {
+                        Color = IM_COL32(0, 0, 255, 255);
+                    }
+                    if (IsPlayerNotVisible)
+                    {
+                        Color = IM_COL32(255, 255, 0, 255);
+                    }
+                    if (IsBotNotVisible)
+                    {
+                        Color = IM_COL32(255, 0, 0, 255);
+                    }
+                    
+                
+                    float Distance = Cheat::localPlayer->GetDistanceTo(Player) / 100.0f;
+                    if (!(Distance > 500.0f))
+                    {
+                        if (!(Player->PlayerKey == Cheat::localController->PlayerKey))
+                        {
+                            if (!(Player->bDead))
+                            {
+                                if (!(Player->bHidden))
+                                {
+                                    if (!(Player->TeamID == Cheat::localController->TeamID))
+                                    {
+                                        
+                                                     int Colorhealth;
+                                        int healthOutline;
+                                        if (Player->bEnsure){
+                                            totalBots++;
+                                            Colorhealth = IM_COL32(0, 255, 0, 170);
+                                            healthOutline = IM_COL32(0, 255, 0, 170);
+                                            }else{
+                                            totalEnemies++;
+                                            Colorhealth = IM_COL32(221, 0, 255, 170);
+                                            healthOutline = IM_COL32(221, 0, 255, 170);           
+                                            }
+                                        FVector Screen;
+                                        int distanceX;
+                                        auto rootc = Player->RootComponent;
+
+                                        FVector PlayerPos = *(FVector *)((uintptr_t)rootc + 0x160);
+
+                                        if (!WorldToScreenPlayer(PlayerPos, Screen, &distanceX))
+                                            continue;
+
+                                        FVector HeadPos = Player->GetBonePos((("Head")), {});
+                                        FVector2D HeadPosition;
+
+                                        FVector RootPos = Player->GetBonePos((("Root")), {});
+                                        FVector2D RootPosition;
+
+                                        if (WorldToScreenBone(HeadPos, (FVector2D *)&HeadPosition) && WorldToScreenBone(RootPos, (FVector2D *)&RootPosition))
+                                        {
+
+                                            if (Cheat::Esp::Line)
+                                            {
+                                                draw->AddLine({(float)glWidth / 2, 0}, {HeadPosition.X, HeadPosition.Y}, Color, 2.0f);
+                                            }
+											
+
+
+if (Cheat::Esp::Health) {
+    int CurHP = (Player->Health < 0) ? 0 : (Player->Health > 100) ? 100 : Player->Health;
+    int MaxHP = 100;
+    long HPColor;
+
+    if (Player->Health < 25) {
+        HPColor = IM_COL32(221, 0, 255, 70);
+    } else if (Player->Health < 50) {
+        HPColor = IM_COL32(2, 199, 18, 70);
+    } else if (Player->Health < 75) {
+        HPColor = IM_COL32(255, 165, 0, 70);
+    } else {
+        HPColor = Colorhealth;
+    }
+
+    if (Player->Health == 0.0f && !Player->bDead) {
+        HPColor = IM_COL32(255, 255, 0, 255);
+        HPColor = IM_COL32(255, 100, 0, 35);
+
+        CurHP = (Player->NearDeathBreath < 0) ? 0 : (Player->NearDeathBreath > 100) ? 100 : Player->NearDeathBreath;
+
+        if (Player->NearDeatchComponent) {
+            MaxHP = 100;
+        }
+    }
+
+    float boxWidth = density / 1.6f;
+    boxWidth -= std::min(((boxWidth / 2) / 0.001f) * Distance, boxWidth / 2);
+    float boxHeight = boxWidth * 0.15f;
+
+    ImVec2 vStart = {HeadPosition.X - (boxWidth / 2), HeadPosition.Y - (boxHeight * 2.001f)};
+    ImVec2 vEndFilled = {vStart.x + (CurHP * boxWidth / MaxHP), vStart.y + boxHeight};
+    ImVec2 vEndRect = {vStart.x + boxWidth, vStart.y + boxHeight};
+
+    draw->AddRectFilledMultiColor(vStart, vEndFilled, IM_COL32(0, 0, 0, 155), HPColor, HPColor, IM_COL32(0, 0, 0, 155));
+    draw->AddRect(vStart, vEndRect, healthOutline, 1.0f);
+}
+
+                                            if (Cheat::Esp::WeaponName)
+                                            {
+                                                std::string weaponname;
+
+                                                weaponname += "FIST";
+
+                                                if (auto WeaponManagerComponent = Player->WeaponManagerComponent)
+                                                {
+                                                    auto PropSlot = WeaponManagerComponent->GetCurrentUsingPropSlot();
+
+                                                    if ((int)PropSlot.GetValue() >= 1 && (int)PropSlot.GetValue() <= 3)
+                                                    {
+                                                        if (auto CurrentWeaponReplicated = WeaponManagerComponent->CurrentWeaponReplicated)
+                                                        {
+                                                            weaponname = CurrentWeaponReplicated->GetWeaponName().ToString();
+                                                        }
+                                                    }
+                                                }
+                                                auto weaponTextSize = ImGui::CalcTextSize2(weaponname.c_str(), 0, 25.0f);
+
+FVector2D startxt(HeadPosition.X - (weaponTextSize.x / 2), HeadPosition.Y - 40.0f);
+
+
+                                                DrawTextWithBorder(draw, weaponname, startxt, IM_COL32(200, 200, 0, 255), outlinecolor, 25.0f);
+                                            }
+											
+											
+                                               if (Cheat::Esp::Skeleton)
+                                            {
+                                                auto HeadPosop = Player->GetBonePos("Head", {});
+                                                HeadPosop.Z -= 5.0f;
+                                                FVector HeadBoneProjected;
+
+                                                auto HeadPosop2 = Player->GetBonePos("Head", {});
+                                                HeadPosop2.Z += 7.0f;
+                                                FVector HeadBoneProjected2;
+
+                                                auto RootPos = Player->GetBonePos("Root", {});
+                                                FVector RootBoneProjected;
+
+                                                auto neck_01 = Player->GetBonePos("neck_01", {});
+                                                FVector NeckBonePrijected;
+
+                                                auto upper_r = Player->GetBonePos("upperarm_r", {});
+                                                FVector upper_rPoSC;
+
+                                                auto lowerarm_r = Player->GetBonePos("lowerarm_r", {});
+                                                FVector lowerarm_rPoSC;
+
+                                                auto hand_r = Player->GetBonePos("hand_r", {});
+                                                FVector hand_rPoSC;
+
+                                                auto upper_l = Player->GetBonePos("upperarm_l", {});
+                                                FVector upper_lPoSC;
+
+                                                auto lowerarm_l = Player->GetBonePos("lowerarm_l", {});
+                                                FVector lowerarm_lSC;
+
+                                                auto hand_l = Player->GetBonePos("hand_l", {});
+                                                FVector hand_lPoSC;
+
+                                                auto thigh_l = Player->GetBonePos("thigh_l", {});
+                                                FVector thigh_lPoSC;
+
+                                                auto calf_l = Player->GetBonePos("calf_l", {});
+                                                FVector calf_lPoSC;
+
+                                                auto foot_l = Player->GetBonePos("foot_l", {});
+                                                FVector foot_lPoSC;
+
+                                                auto thigh_r = Player->GetBonePos("thigh_r", {});
+                                                FVector thigh_rPoSC;
+
+                                                auto calf_r = Player->GetBonePos("calf_r", {});
+                                                FVector calf_rPoSC;
+
+                                                auto foot_r = Player->GetBonePos("foot_r", {});
+                                                FVector foot_rPoSC;
+
+                                                auto pelvis = Player->GetBonePos("pelvis", {});
+                                                FVector pelvisposc;
+
+                                                if (WorldToScreenBone(HeadPosop, (FVector2D *)&HeadBoneProjected) &&
+                                                        WorldToScreenBone(HeadPosop2, (FVector2D *)&HeadBoneProjected2) &&
+                                                        WorldToScreenBone(upper_r, (FVector2D *)&upper_rPoSC) &&
+                                                        WorldToScreenBone(upper_l, (FVector2D *)&upper_lPoSC) &&
+                                                        WorldToScreenBone(lowerarm_r, (FVector2D *)&lowerarm_rPoSC) &&
+                                                        WorldToScreenBone(hand_r, (FVector2D *)&hand_rPoSC) &&
+                                                        WorldToScreenBone(lowerarm_l, (FVector2D *)&lowerarm_lSC) &&
+                                                        WorldToScreenBone(hand_l, (FVector2D *)&hand_lPoSC) &&
+                                                        WorldToScreenBone(thigh_l, (FVector2D *)&thigh_lPoSC) &&
+                                                        WorldToScreenBone(calf_l, (FVector2D *)&calf_lPoSC) &&
+                                                        WorldToScreenBone(foot_l, (FVector2D *)&foot_lPoSC) &&
+                                                        WorldToScreenBone(thigh_r, (FVector2D *)&thigh_rPoSC) &&
+                                                        WorldToScreenBone(calf_r, (FVector2D *)&calf_rPoSC) &&
+                                                        WorldToScreenBone(foot_r, (FVector2D *)&foot_rPoSC) &&
+                                                        WorldToScreenBone(neck_01, (FVector2D *)&NeckBonePrijected) &&
+                                                        WorldToScreenBone(pelvis, (FVector2D *)&pelvisposc) &&
+                                                        WorldToScreenBone(RootPos, (FVector2D *)&RootBoneProjected))
+                                                {
+
+                                                    draw->AddCircle({HeadBoneProjected2.X, HeadBoneProjected2.Y}, Screen.Z / 15, Color, 0, 2.0f);
+                                                    draw->AddLine({upper_rPoSC.X, upper_rPoSC.Y}, {NeckBonePrijected.X, NeckBonePrijected.Y}, Color, 2.0f);
+                                                    draw->AddLine({upper_lPoSC.X, upper_lPoSC.Y}, {NeckBonePrijected.X, NeckBonePrijected.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({upper_rPoSC.X, upper_rPoSC.Y}, {lowerarm_rPoSC.X, lowerarm_rPoSC.Y}, Color, 2.0f);
+                                                    draw->AddLine({lowerarm_rPoSC.X, lowerarm_rPoSC.Y}, {hand_rPoSC.X, hand_rPoSC.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({upper_lPoSC.X, upper_lPoSC.Y}, {lowerarm_lSC.X, lowerarm_lSC.Y}, Color, 2.0f);
+                                                    draw->AddLine({lowerarm_lSC.X, lowerarm_lSC.Y}, {hand_lPoSC.X, hand_lPoSC.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({thigh_rPoSC.X, thigh_rPoSC.Y}, {thigh_lPoSC.X, thigh_lPoSC.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({thigh_lPoSC.X, thigh_lPoSC.Y}, {calf_lPoSC.X, calf_lPoSC.Y}, Color, 2.0f);
+                                                    draw->AddLine({calf_lPoSC.X, calf_lPoSC.Y}, {foot_lPoSC.X, foot_lPoSC.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({thigh_rPoSC.X, thigh_rPoSC.Y}, {calf_rPoSC.X, calf_rPoSC.Y}, Color, 2.0f);
+                                                    draw->AddLine({calf_rPoSC.X, calf_rPoSC.Y}, {foot_rPoSC.X, foot_rPoSC.Y}, Color, 2.0f);
+
+                                                    draw->AddLine({NeckBonePrijected.X, NeckBonePrijected.Y}, {pelvisposc.X, pelvisposc.Y}, Color, 2.0f);
+                                                    draw->AddLine({NeckBonePrijected.X, NeckBonePrijected.Y}, {HeadBoneProjected.X, HeadBoneProjected.Y}, Color, 2.0f);
+                                                }}
+
+  if (Cheat::Esp::Name || Cheat::Esp::Distance)
+                                            {
+                                                std::string nameText;
+                                                std::string distanceText;
+
+                                                if (Cheat::Esp::Name)
+{
+
+nameText += std::to_string((int) Player->TeamID);
+                                    nameText += " - ";
+                                    if (Player->bEnsure) {
+                                        nameText += "BOT";
+                                    } else {
+                                        nameText += Player->PlayerName.ToString();
+                                    }
+}
+
+if (Cheat::Esp::Distance)
+{
+    distanceText += (!nameText.empty() ? ("  ") : "") +
+                    std::to_string(static_cast<int>(Distance)) + ("m");
+}
+
+auto nameTextSize = ImGui::CalcTextSize2(nameText.c_str(), 0, 25.0f);
+auto distanceTextSize = ImGui::CalcTextSize2(distanceText.c_str(), 0, 25.0f);
+
+if (Player->bEnsure)
+{
+    DrawTextWithBorder(draw, nameText, {RootPosition.X - (nameTextSize.x / 2), RootPosition.Y}, IM_COL32(255, 255, 255, 255), IM_COL32(010, 43, 255, 255), 20.0f);
+}
+else
+{
+    DrawTextWithBorder(draw, nameText, {RootPosition.X - (nameTextSize.x / 2), RootPosition.Y}, IM_COL32(255, 255, 255, 255), IM_COL32(10, 43, 255, 255), 20.0f);
+}
+
+DrawTextWithBorder(draw, distanceText, {RootPosition.X - (distanceTextSize.x / 2), RootPosition.Y + 20}, IM_COL32(0, 0, 0, 255), IM_COL32(255, 0, 0, 255), 20.0f);
+                                            }
+                                            
+                                            
+                                            
+                                            }}}}
+                                            
+                                            
+                                        }
+                                    }
+                                }
+				
+				
+
+                if (Cheat::Esp::Vehicle::Name)
+                {
+                    if (Actor->IsA(ASTExtraVehicleBase::StaticClass()))
+                    {
+                        auto Vehicle = (ASTExtraVehicleBase *)Actor;
+
+                        if (!Vehicle->Mesh)
+                            continue;
+
+                        float Distance = Vehicle->GetDistanceTo(Cheat::localPlayer) / 100.f;
+
+                        if (Distance < 10.0f)
+                            continue;
+
+                        FVector2D vehiclePos;
+
+                        if (WorldToScreenBone(Vehicle->K2_GetActorLocation(), &vehiclePos))
+                        {
+                            auto mWidthScale = std::min(0.10f * Distance, 50.f);
+                            auto mWidth = 70.f - mWidthScale;
+                            auto mHeight = mWidth * 0.15f;
+
+                            std::string vehicleName = GetVehicleName(Vehicle);
+                            std::string distanceText = (" - ") + std::to_string(static_cast<int>(Distance)) + ("M");
+                            std::string displayText = vehicleName + distanceText;
+
+                            DrawTextWithBorder(draw, displayText, {vehiclePos.X - (mWidth / 2), vehiclePos.Y}, IM_COL32(255, 215, 0, 255), outlinecolor, 25.0f);
+                        }
+                    }
+                }
+
+
+
+
+                
+                
+
+                if (Cheat::Esp::ItemEsp)
+                {
+                    if (Actor->IsA(APickUpWrapperActor::StaticClass()))
+                    {
+                        auto PickUp = (APickUpWrapperActor *)Actor;
+                        if (Items[PickUp->DefineID.TypeSpecificID])
+                        {
+                            auto RootComponent = PickUp->RootComponent;
+                            if (!RootComponent)
+                                continue;
+
+                            float Distance = PickUp->GetDistanceTo(Cheat::localPlayer) / 100.f;
+
+                            if (Distance > 200)
+                                continue;
+
+                            FVector2D itemPos;
+
+                            if (WorldToScreenBone(PickUp->K2_GetActorLocation(), &itemPos))
+                            {
+                                std::string itemName;
+                                uint32_t textColor = 0xFF000000;
+
+                                for (const auto &category : items_data)
+                                {
+                                    for (const auto &item : category[("Items")])
+                                    {
+                                        if (item[("itemId")] == PickUp->DefineID.TypeSpecificID)
+                                        {
+                                            itemName = item[("itemName")].get<std::string>();
+                                            textColor = std::stoul(item[("itemTextColor")].get<std::string>(), nullptr, 16);
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                std::string distanceText = (" - ") + std::to_string(static_cast<int>(Distance)) + ("M");
+                                std::string displayText = itemName + distanceText;
+                                DrawTextWithBorder(draw, displayText, {itemPos.X, itemPos.Y}, textColor, outlinecolor, 25.0f);
+                            }
+                        }
+                    }
+                }
+            }
+			char extra[32];
+      int TotalCount = totalEnemies;
+ 
+    ImGui::GetForegroundDrawList()->AddRectFilled({glWidth /2.0-114.988,100},{glWidth /2.0- -96.085,100},ImColor(255, 255, 255, 180), 100.0f);
+  //  ImGui::GetForegroundDrawList()->AddRectFilled({glWidth /2+80,40},{glWidth /2+20,80},ImColor(72,255,0,255));     
+    sprintf(extra, "Enemies: %d  ", totalEnemies);
+    ImGui::GetForegroundDrawList()->AddText({glWidth /2.0-107.977,100}, ImColor(0, 0, 0, 255), extra);
+    sprintf(extra, "Bots: %d ", totalBots);
+    ImGui::GetForegroundDrawList()->AddText({glWidth /2.0+35.430,100}, ImColor(0, 0, 0, 255), extra);
+        }
+        }}
+        
+EGLBoolean (*orig_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
+EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
+{
+    eglQuerySurface(dpy, surface, EGL_WIDTH, &glWidth);
+    eglQuerySurface(dpy, surface, EGL_HEIGHT, &glHeight);
+
+    screenWidth = ANativeWindow_getWidth(g_App->window);
+    screenHeight = ANativeWindow_getHeight(g_App->window);
+    density = AConfiguration_getDensity(g_App->config);
+
+	if (!initImGui)
+    {
+                ImGui::CreateContext();
+
+        ImGuiStyle& style = ImGui::GetStyle();
+            
+
+
+
+ 
+	style.WindowPadding = ImVec2(15, 15);
+	style.WindowRounding = 5.0f;
+	style.FramePadding = ImVec2(5, 5);
+	style.FrameRounding = 4.0f;
+	style.ItemSpacing = ImVec2(12, 8);
+	style.ItemInnerSpacing = ImVec2(8, 6);
+	style.IndentSpacing = 25.0f;
+	style.ScrollbarSize = 15.0f;
+	style.ScrollbarRounding = 9.0f;
+	style.GrabMinSize = 5.0f;
+	style.GrabRounding = 3.0f;
+ 
+	style.Colors[ImGuiCol_Text]                  = ImColor(255, 255, 255, 255);
+        style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_WindowBg]              = ImColor(0, 0, 0, 155);
+        style.Colors[ImGuiCol_ChildBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_PopupBg]               = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
+        style.Colors[ImGuiCol_Border]                = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
+        style.Colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+
+        style.Colors[ImGuiCol_FrameBg]               = ImColor(51, 64, 73, 150);
+        style.Colors[ImGuiCol_FrameBgActive]         = ImColor(37, 36, 37, 150);
+        style.Colors[ImGuiCol_FrameBgHovered]        = ImColor(37, 36, 37, 150);
+
+        style.Colors[ImGuiCol_TitleBg]               = ImColor(26, 38, 42, 255);
+        style.Colors[ImGuiCol_TitleBgActive]         = ImColor(26, 38, 42, 255);
+        style.Colors[ImGuiCol_TitleBgCollapsed]      = ImColor(26, 30, 40, 130);
+
+        style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(1.0f, 1.0f, 1.0f, 0.80f);
+        style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
+        style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
+        style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
+        style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
+        style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.39f, 1.72f, 0.57f, 1.00f);
+        style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
+        style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
+
+        style.Colors[ImGuiCol_Separator]             = ImColor(70, 70, 70, 255);
+        style.Colors[ImGuiCol_SeparatorActive]       = ImColor(76, 76, 76, 255);
+        style.Colors[ImGuiCol_SeparatorHovered]      = ImColor(76, 76, 76, 255);
+
+        style.Colors[ImGuiCol_Button]                = ImColor(31, 30, 31, 255);
+        style.Colors[ImGuiCol_ButtonActive]          = ImColor(39, 172, 57, 255);
+        style.Colors[ImGuiCol_ButtonHovered]         = ImColor(39, 172, 57, 255);
+
+        style.Colors[ImGuiCol_Header]                = ImColor(0, 0, 0, 0);
+        style.Colors[ImGuiCol_HeaderActive]          = ImColor(0, 0, 0, 0);
+        style.Colors[ImGuiCol_HeaderHovered]         = ImColor(46, 46, 46, 255);
+
+        style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
+        style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+        style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+        style.Colors[ImGuiCol_PlotLines]             = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
+		
+        style.ScaleAllSizes(std::max(2.5f, density / 400.0f));
+        style.ScrollbarSize /= 1;
+
+        ImGui_ImplAndroid_Init();
+        ImGui_ImplOpenGL3_Init("#version 300 es");
+
+            ImGuiIO &io = ImGui::GetIO();
+        io.Fonts->AddFontFromMemoryTTF((void *)SILENT_data, SILENT_size, 30.0f, NULL, io.Fonts->GetGlyphRangesDefault());    
+        
+        io.ConfigWindowsMoveFromTitleBarOnly = true;
+        io.IniFilename = NULL;
+
+        ImFontConfig cfg;
+        cfg.SizePixels = ((float) density / 18.0f);
+        io.Fonts->AddFontDefault(&cfg);
+        
+        initImGui = true;
+		
+    }
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplAndroid_NewFrame(glWidth, glHeight);
+    ImGui::NewFrame();
+
+    GetLocalPlayer();
+    DrawESP(ImGui::GetBackgroundDrawList());
+
+        if (ImGui::Begin("", 0, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize |  ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse |  ImGuiWindowFlags_NoTitleBar)) { 
+              static bool isLogin = false;
+
+            static std::string err;
+            if (!isLogin) {
+                ImGui::Text("Please Login! (Copy Key to Clipboard)");
+
+                ImGui::PushItemWidth(-1);
+                static char s[64];
+                ImGui::InputText("##key", s, sizeof s);
+              
+                auto key = getClipboardText();
+                strncpy(s, key.c_str(), sizeof s);
+              
+
+                err = Login(s);
+                if (err == "OK") {
+                    isLogin = bValid && g_Auth == g_Token;
+                }
+                ImGui::PopItemWidth();
+
+                ImGui::PushItemWidth(-1);
+                if (ImGui::Button(" Paste Key  ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
+                    auto key = getClipboardText();
+                    strncpy(s, key.c_str(), sizeof s);
+                }
+                ImGui::PopItemWidth();
+
+                ImGui::PushItemWidth(-1);
+
+
+                if (ImGui::Button("Login", ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
+                    err = Login(s);
+                    if (err == "OK") {
+                        isLogin = bValid && g_Auth == g_Token;
+                    }
+                }
+                ImGui::PopItemWidth();
+
+                if (!err.empty() && err != "OK") {
+                    ImGui::Text("Error: %s", err.c_str());
+                }
+
+                ImGui::PopItemWidth();
+
+            } else{
+if (!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) {  
+if (!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) {
+     
+	  
+        
+ 		
+		Cheat::Esp::Line = true;
+        Cheat::Esp::Skeleton = true;
+        Cheat::Esp::Health = true;
+        Cheat::Esp::Distance = true;
+   
+        Cheat::Esp::Target = true;
+     //   Cheat::Esp::Vehicle::Name = false;
+  
+        Cheat::Esp::TargetLine = true;     
+       Cheat::Esp::WeaponName = true;
+       // Cheat::Aimbot::Enable = true;
+	    if ( Cheat::Aimbot::Enable){
+        //Cheat::Aimbot::Enable = true;
+		Cheat::Aimbot::VisCheck = true;
+        Cheat::Aimbot::IgnoreKnock = true;
+       //Cheat::Aimbot::RecoilControl = 1.2f;
+        Cheat::Aimbot::Radius = 450.0f;
+        Cheat::Aimbot::IgnoreBot = true;
+		Cheat::Esp::Alert = true;
+	  Cheat::Aimbot::RecoilSet = 1.100f;//ACTIVE 1
+                        
+                              
+                       
+                       
+                        		}}	                                                                                        
+		}}
+}
+        ImGui::End();
+    ImGui::Render();
+				
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    return orig_eglSwapBuffers(dpy, surface);
+}
+
+
+
+
+
+
+
+
+uintptr_t getBase(pid_t pid)
+{
+    FILE *fp;
+    uintptr_t addr = 0;
+    char filename[40], buffer[1024];
+    snprintf(filename, sizeof(filename), "/proc/%d/maps", pid);
+    fp = fopen(filename, "rt");
+    if (fp != NULL)
+    {
+        while (fgets(buffer, sizeof(buffer), fp))
+        {
+            if (strstr(buffer, "libUE4.so"))
+            {
+                addr = (uintptr_t)strtoul(buffer, NULL, 16);
+                break;
+            }
+        }
+        fclose(fp);
+    }
+    return addr;
+}
+
+void FixGameCrash()
+{
+    system("rm -rf /data/data/com.pubg.imobile/files");
+    system("rm -rf /data/data/com.pubg.imobile/files/ano_tmp");
+    system("touch /data/data/com.pubg.imobile/files/ano_tmp");
+    system("chmod 000 /data/data/com.pubg.imobile/files/ano_tmp");
+    system("rm -rf /data/data/com.pubg.imobile/files/obblib");
+    system("touch /data/data/com.pubg.imobile/files/obblib");
+    system("chmod 000 /data/data/com.pubg.imobile/files/obblib");
+    system("rm -rf /data/data/com.pubg.imobile/files/xlog");
+    system("touch /data/data/com.pubg.imobile/files/xlog");
+    system("chmod 000 /data/data/com.pubg.imobile/files/xlog");
+    system("rm -rf /data/data/com.pubg.imobile/app_bugly");
+    system("touch /data/data/com.pubg.imobile/app_bugly");
+    system("chmod 000 /data/data/com.pubg.imobile/app_bugly");
+    system("rm -rf /data/data/com.pubg.imobile/app_crashrecord");
+    system("touch /data/data/com.pubg.imobile/app_crashrecord");
+    system("chmod 000 /data/data/com.pubg.imobile/app_crashrecord");
+    system("rm -rf /data/data/com.pubg.imobile/app_crashSight");
+    system("touch /data/data/com.pubg.imobile/app_crashSight");
+    system("chmod 000 /data/data/com.pubg.imobile/app_crashSight");
+}
+
+void *main_thread(void *)
+{
+    FixGameCrash();
+    pid_t Pid = getpid();
+    Cheat::libUE4Base = getBase(Pid);
+
+    while (!Cheat::libUE4Base)
+    {
+        Cheat::libUE4Base = getBase(Pid);
+        sleep(1);
+    }
+
+    while (!g_App)
+    {
+        g_App = *(android_app **)(Cheat::libUE4Base + Cheat::GNativeAndroidApp_Offset);
+        sleep(1);
+    }
+
+    
+    FName::GNames = GetGNames();
+    while (!FName::GNames)
+    {
+        FName::GNames = GetGNames();
+        sleep(1);
+    }
+    
+    UObject::GUObjectArray = (FUObjectArray *)(Cheat::libUE4Base + Cheat::GUObject_Offset);
+    DobbyHook((void *)DobbySymbolResolver("/system/lib/libandroid.so", "ANativeWindow_getWidth"), (void *)_ANativeWindow_getWidth, (void **)&orig_ANativeWindow_getWidth);
+    DobbyHook((void *)DobbySymbolResolver("/system/lib/libandroid.so", "ANativeWindow_getHeight"), (void *)_ANativeWindow_getHeight, (void **)&orig_ANativeWindow_getHeight);
+    DobbyHook((void *)DobbySymbolResolver("/system/lib/libinput.so", "_ZN7android13InputConsumer21initializeMotionEventEPNS_11MotionEventEPKNS_12InputMessageE"), (void *)onInputEvent, (void **)&orig_onInputEvent);
+    DobbyHook((void *)DobbySymbolResolver("/system/lib/libEGL.so", "eglSwapBuffers"), (void *)_eglSwapBuffers, (void **)&orig_eglSwapBuffers);
+    items_data = json::parse(JSON_ITEMS);
+    return nullptr;
+}
+
+
+DWORD libUE4Base = 0;
+DWORD libanogsBase = 0;
+DWORD libanortBase = 0;
+DWORD libanogsAlloc = 0;
+DWORD libUE4Alloc = 0;
+unsigned int libanogsSize  = 0;
+unsigned int libUE4Size  = 0;
+
+#define HOOK
+void *(*orig_memmove)(void *dest, const void *src, size_t size);
+void* hook_memmove(void *dest, const void *src, size_t size) {
+    auto ret = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+
+
+    if((DWORD)ret >= libanogsBase && (DWORD)ret <= (DWORD)(libanogsBase + libanogsSize)){
+    } else {
+        return 0;
+    }
+
+    return orig_memmove(dest,src,size);
+}
+
+__int64 __fastcall WRAPPED_TDR_OP(__int64 a1, __int64 a2, __int64 a3) {
+    if (rand() % 100 > 95) {
+        usleep(rand() % 50000);
+    }
+    return 0;
+}
+
+extern "C" void __attribute__((constructor)) init_hook() {
+
+}
+
+int sub_3610F8(int a1) {
+  return 0;
+}
+void sub_361386(int* v9, int v4) {
+  v9[0] = v4; 
+}
+void sub_36139C(int* v9) {
+}
+
+int __fastcall sub_380588(int a1, int a2)
+{
+  int v4; // r0
+  int v5; // r0
+  int v6; // r1
+  int v7; // r4
+  int v9[3]; // [sp+4h] [bp-Ch] BYREF
+
+  v4 = sub_3610F8(a1);
+  sub_361386(v9, v4);
+  v5 = 0;
+  while ( 1 )
+  {
+    v6 = *(_DWORD *)(a1 + 4 * v5);
+    if ( !v6 || v6 == a2 )
+      break;
+    if ( ++v5 == 32 )
+    {
+      v7 = -1;
+      goto LABEL_7;
+    }
+  }
+  *(_DWORD *)(a1 + 4 * v5) = a2;
+  v7 = 0;
+LABEL_7:
+  sub_36139C(v9);
+  return v7;
+}
+int __fastcall sub_B5044(const char *a1, int a2)
+{
+    return 0;
+}
+int __fastcall sub_E8B44(int result, const char *a2)
+{
+  int v2; // r3
+
+  if ( a2 && *a2 )
+  {
+    v2 = *(_DWORD *)(result + 12);
+    *(_DWORD *)(result + 12) = v2 + 1;
+    if ( v2 <= 5 )
+      sub_B5044(a2, v2 + 1);
+  }
+  return result;
+}
+
+void __fastcall sub_E58E8(int a1)
+{
+  (a1, *(int **)(a1 + 8));
+  *(_DWORD *)(a1 + 12) = a1 + 4;
+  *(_DWORD *)(a1 + 8) = 0;
+  *(_DWORD *)(a1 + 16) = a1 + 4;
+  *(_DWORD *)(a1 + 20) = 0;
+}
+int (*oreturnNull)();
+int returnNull(){
+return 0;
+}
+int __fastcall sub_CF944(int a1)
+{
+  int v2; // r0
+
+  if ( !*(_BYTE *)(a1 + 4) )
+  {
+    v2 = syscall(224);
+    *(_BYTE *)(a1 + 4) = 1;
+    *(_DWORD *)a1 = v2;
+  }
+  return a1;
+}
+
+void sub_1D845C()
+{
+  ;
+}
+
+void sub_1D846C()
+{
+  ;
+}
+
+//HOOK ANOGS BYPASS
+#include <cstring>
+#include <cstdint>
+
+char byte_4A5BD4 = 0;
+int sub_1D85CC()
+ {
+    return 0;
+}
+int sub_1D8AEC()
+ {
+    return 0;
+}
+int sub_168150()
+ {
+    return 0;
+}
+int __fastcall sub_147784(int a1, int a2, char a3)
+ {
+    return 0;
+}
+int __fastcall sub_222DA4(const char *a1, const char *a2, int a3)
+ {
+    return 0;
+}
+int __fastcall sub_1D97AC(int a1, int a2)
+ {
+    return 0;
+}
+__int64 loc_79738() {
+    return 0; 
+}
+
+int sub_1D94F4() {
+    const char *v1; // [sp+1Ch] [bp-434h]
+    char *s2; // [sp+20h] [bp-430h]
+    int v3; // [sp+24h] [bp-42Ch]
+    char v4; // [sp+2Fh] [bp-421h]
+    int v5; // [sp+30h] [bp-420h] BYREF
+    char v6[2]; // [sp+35h] [bp-41Bh] BYREF
+    char v7[525]; // [sp+37h] [bp-419h] BYREF
+    _BYTE dest[512]; // [sp+244h] [bp-20Ch] BYREF
+
+    if ((byte_4A5BD4 & 1) != 0) {
+        v4 = 1;
+    } else if (sub_1D85CC() || sub_1D8AEC()) {
+        v4 = 0;
+    } else {
+        v5 = 0;
+        memcpy(dest, "sst_engine_module_name", sizeof(dest));
+        memset(&v7[13], 0, 0x200u);
+        
+        v3 = ((int(__fastcall *)(int, _BYTE *, char *, int, int *))loc_79738)(6, dest, &v7[13], 512, &v5);
+        s2 = *(char **)(sub_168150() + 304);
+
+        if (!v3 && strnlen(&v7[13], 0x200u)) {
+            v1 = &v7[13];
+            if (s2 && strncmp(&v7[13], s2, 0x200u)) {
+                v1 = s2;
+            }
+        } else {
+            v1 = s2;
+        }
+
+        if (v1) {
+            v6[0] = 125; // '}'
+            v6[1] = 127; // 
+            strcpy(v7, "tKoyhZm~~}jk");
+            sub_147784((int)v6, 14, 24);
+
+            if (sub_222DA4(v1, v6, (int)sub_1D97AC)) {
+                v4 = 0;
+            } else {
+                byte_4A5BD4 = 1;
+                v4 = 1;
+            }
+        } else {
+            v4 = 0;
+        }
+    }
+
+    return v4 & 1;
+}
+
+
+
+
+
+//Bypass thread
+void * CyberBypass_thread(void *) {
+       do {
+        sleep(1);
+    } while (!isLibraryLoaded("libTBlueData.so")); 	
+//PUT BYPASS
+PATCH_LIB("libanogs.so","0x8C8B8","00 20 70 47");//This bypass fix only offline Ban
+HOOK_LIB_NO_ORIG("libanogs.so","0x6F338", WRAPPED_TDR_OP);
+/*HOOK((void*)(libanogsBase + string2Offset(OBFUSCATE("0x6F80C"))), hook_memmove, &orig_memmove);
+HOOK_LIB_NO_ORIG("libanogs.so","0x1D94F4", sub_1D94F4);
+HOOK_LIB_NO_ORIG("libanogs.so","0x1D845C", sub_1D845C);
+HOOK_LIB_NO_ORIG("libanogs.so","0x1D846C", sub_1D846C);
+PATCH_LIB("libanogs.so","0x79948","00 20 70 47");//C32//FIXOFFLINE
+PATCH_LIB("libanogs.so","0x6F4DC","00 20 70 47");//KILL//FIX10YEAR*/
+	
+return NULL;
+
+}
+
+
+
+
+__attribute__((constructor)) void _init()
+{
+	pthread_t ptid;
+    pthread_create(&t, NULL, main_thread, NULL);
+	pthread_create(&t, NULL, CyberBypass_thread, NULL);
+
+}
